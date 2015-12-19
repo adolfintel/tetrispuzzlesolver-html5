@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tetris Puzzle Solver</title>
+<style type="text/css">
+body{
+	font-family: sans-serif;
+	font-size:0.8em;
+	text-align:center;
+	color:#404040;
+	background-color:#FFFFFF;
+}
+form > table{
+	margin-left:auto; margin-right:auto;
+}
+h1{
+	font-weight:100;
+	font-size:3em;
+	display:block;
+}
+p{
+	margin-bottom:2em;
+}
+.tetraminoIcon{
+	width:6em;
+	height:auto;
+	margin:0.8em;
+}
+input{
+	background-color:#EEEEEE;
+	color:#000000;
+	border:1px solid #808080;
+	font-size:1.4em;
+	padding:0.2em;
+}
+input[type="number"]{
+	width:3.5em;
+}
+input[type="submit"]{
+	padding-left:0.8em; padding-right:0.8em;
+}
+input:active, input:focus, input:hover{
+	border-color:#4040FF;
+}
+</style>
+<script type="text/javascript">
+var BLOCK_SIZE=0; //will be replaced by 4em
+
+function solve(){
+document.getElementById("params").style.display="none";
+document.getElementById("grid").style.display="";
+
+var rows=Number(document.getElementById("rows").value),
+	cols=Number(document.getElementById("cols").value),
+	iblocks=Number(document.getElementById("iblocks").value),
+	oblocks=Number(document.getElementById("oblocks").value),
+	tblocks=Number(document.getElementById("tblocks").value),
+	jblocks=Number(document.getElementById("jblocks").value),
+	lblocks=Number(document.getElementById("lblocks").value),
+	sblocks=Number(document.getElementById("sblocks").value),
+	zblocks=Number(document.getElementById("zblocks").value),
+	nPieces=iblocks+oblocks+tblocks+jblocks+lblocks+sblocks+zblocks;
+	var colors=new Array(nPieces+1);
+	colors[0]="#202020";
+	for(var i=0;i<nPieces;i++){
+		colors[i+1]="hsl("+(360*(i/nPieces))+","+(i%2==0?100:50)+"%,50%)";
+	}
+	var w=new Worker("solver.js");
+	w.onmessage=function(event){
+		var params=event.data.split(" ");
+		if(params[0].indexOf("impossible")==0){
+			w.terminate();
+			document.getElementById("grid").style.display="none";
+			document.getElementById("params").style.display="";
+			alert("Impossible");
+			return;
+		}
+		if(params[0].indexOf("solved")==0){
+			w.terminate();
+			document.getElementById("params").style.display="";
+			return;
+		}
+		if(params[0].indexOf("grid")==0){
+			var grid=document.getElementById("grid");
+			var cols=Number(params[2]), rows=Number(params[1]);
+			grid.width=BLOCK_SIZE*cols;
+			grid.height=BLOCK_SIZE*rows;
+			var c=grid.getContext("2d");
+			for(var y=0;y<rows;y++){
+				for(var x=0;x<cols;x++){
+					var v=Number(params[3+(y*cols)+x]);
+					c.fillStyle=colors[v];
+					c.fillRect(BLOCK_SIZE*x,BLOCK_SIZE*y,BLOCK_SIZE,BLOCK_SIZE);
+				}
+			}
+			return;
+		}
+	}
+
+	w.postMessage("s "+rows+" "+cols+" "+iblocks+" "+oblocks+" "+tblocks+" "+jblocks+" "+lblocks+" "+sblocks+" "+zblocks);
+
+
+}
+</script>
+</head>
+<body>
+<script type="text/javascript">
+	var div = document.createElement('div');
+    div.style.width = "4em";
+    document.body.appendChild(div);
+    var BLOCK_SIZE = div.offsetWidth;
+    document.body.removeChild(div);
+</script>
+<h1>Tetris Puzzle Solver</h1>
+<p>Fills a rectangle with tetraminos.<br/>Requires HTML5 Canvas and Web Workers support.</p>
+<canvas id="grid" width=0; height=0; style="display:none; margin-bottom:2em;"> </canvas>
+<form id="params" action="javascript:solve()">
+<table>
+<tr><td>Rectangle size<br/>(Rows X Columns)</td><td><input id="rows" type="number"  min="1" value="6" /> X <input id="cols" type="number"  min="1" value="8" /></td></tr>
+<tr><td><img src="images/i.png" class="tetraminoIcon" alt="I Blocks" /></td><td><input id="iblocks" type="number"  min="0" value="1" /></td></tr>
+<tr><td><img src="images/o.png" class="tetraminoIcon" alt="O Blocks" /></td><td><input id="oblocks" type="number"  min="0" value="5" /></td></tr>
+<tr><td><img src="images/t.png" class="tetraminoIcon" alt="T Blocks" /></td><td><input id="tblocks" type="number"  min="0" value="2" /></td></tr>
+<tr><td><img src="images/j.png" class="tetraminoIcon" alt="J Blocks" /></td><td><input id="jblocks" type="number"  min="0" value="0" /></td></tr>
+<tr><td><img src="images/l.png" class="tetraminoIcon" alt="L Blocks" /></td><td><input id="lblocks" type="number"  min="0" value="1" /></td></tr>
+<tr><td><img src="images/s.png" class="tetraminoIcon" alt="S Blocks" /></td><td><input id="sblocks" type="number"  min="0" value="2" /></td></tr>
+<tr><td><img src="images/z.png" class="tetraminoIcon" alt="Z Blocks" /></td><td><input id="zblocks" type="number"  min="0" value="1" /></td></tr>
+</table>
+<input type="submit" id="start" value="Solve"/>
+</form>
+
+</body>
+</html>
