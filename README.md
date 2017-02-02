@@ -4,13 +4,13 @@ Solves sigil puzzles found in The Talos Principle and Sigils of Elohim.
 It fills a rectangle of given size with a set of tetrominos (tetris pieces) using an optimized brute force algorithm.
  
 ## Try it!
-[Sigil Puzzle Solver](http://adolfintel.com/talos)
+[Sigil Puzzle Solver](http://fdossena.com/talos)
  
 ## Compatibility
 Any modern browser shoud work. Requires Canvas and Web Workers support
 
 ## Screenshots
-![Screenshot](http://adolfintel.com/talos/web1.png)
+![Screenshot](http://fdossena.com/talos/web1.png)
 
 ## License
 Copyright (C) 2015 Federico Dossena
